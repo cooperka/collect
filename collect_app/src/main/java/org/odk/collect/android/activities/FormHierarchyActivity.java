@@ -217,52 +217,51 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             // Record the current index so we can return to the same place if the user hits 'back'.
             currentIndex = index;
 
-            // If we're not at the first level, we're inside a repeated group so we want to only
-            // display
-            // everything enclosed within that group.
-            String contextGroupRef = "";
+//            // If we're not at the first level, we're inside a repeated group so we want to only
+//            // display everything enclosed within that group.
+//            String contextGroupRef = "";
             elementsToDisplay = new ArrayList<>();
 
-            // If we're currently at a repeat node, record the name of the node and step to the next
-            // node to display.
-            if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
-                contextGroupRef =
-                        formController.getFormIndex().getReference().toString(true);
-                formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-            } else {
-                FormIndex startTest = formController.stepIndexOut(currentIndex);
-                // If we have a 'group' tag, we want to step back until we hit a repeat or the
-                // beginning.
-                while (startTest != null
-                        && formController.getEvent(startTest) == FormEntryController.EVENT_GROUP) {
-                    startTest = formController.stepIndexOut(startTest);
-                }
-                if (startTest == null) {
-                    // check to see if the question is at the first level of the hierarchy. If it
-                    // is,
-                    // display the root level from the beginning.
-                    formController.jumpToIndex(FormIndex
-                            .createBeginningOfFormIndex());
-                } else {
-                    // otherwise we're at a repeated group
-                    formController.jumpToIndex(startTest);
-                }
-
-                // now test again for repeat. This should be true at this point or we're at the
-                // beginning
-                if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
-                    contextGroupRef =
-                            formController.getFormIndex().getReference().toString(true);
-                    formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-                }
-            }
+//            // If we're currently at a repeat node, record the name of the node and step to the next
+//            // node to display.
+//            if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
+//                contextGroupRef =
+//                        formController.getFormIndex().getReference().toString(true);
+//                formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+//            } else {
+//                FormIndex startTest = formController.stepIndexOut(currentIndex);
+//                // If we have a 'group' tag, we want to step back until we hit a repeat or the
+//                // beginning.
+//                while (startTest != null
+//                        && formController.getEvent(startTest) == FormEntryController.EVENT_GROUP) {
+//                    startTest = formController.stepIndexOut(startTest);
+//                }
+//                if (startTest == null) {
+//                    // check to see if the question is at the first level of the hierarchy. If it
+//                    // is,
+//                    // display the root level from the beginning.
+//                    formController.jumpToIndex(FormIndex
+//                            .createBeginningOfFormIndex());
+//                } else {
+//                    // otherwise we're at a repeated group
+//                    formController.jumpToIndex(startTest);
+//                }
+//
+//                // now test again for repeat. This should be true at this point or we're at the
+//                // beginning
+//                if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
+//                    contextGroupRef =
+//                            formController.getFormIndex().getReference().toString(true);
+//                    formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+//                }
+//            }
 
             int event = formController.getEvent();
             if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
                 // The beginning of form has no valid prompt to display.
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-                contextGroupRef =
-                        formController.getFormIndex().getReference().getParentRef().toString(true);
+//                contextGroupRef =
+//                        formController.getFormIndex().getReference().getParentRef().toString(true);
                 groupPathTextView.setVisibility(View.GONE);
                 jumpPreviousButton.setEnabled(false);
             } else {
@@ -271,49 +270,47 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                 jumpPreviousButton.setEnabled(true);
             }
 
-            // Refresh the current event in case we did step forward.
-            event = formController.getEvent();
+//            // Refresh the current event in case we did step forward.
+//            event = formController.getEvent();
 
-            // Big change from prior implementation:
-            //
-            // The ref strings now include the instance number designations
-            // i.e., [0], [1], etc. of the repeat groups (and also [1] for
-            // non-repeat elements).
-            //
-            // The contextGroupRef is now also valid for the top-level form.
-            //
-            // The repeatGroupRef is null if we are not skipping a repeat
-            // section.
-            //
-            String repeatGroupRef = null;
+//            // Big change from prior implementation:
+//            //
+//            // The ref strings now include the instance number designations
+//            // i.e., [0], [1], etc. of the repeat groups (and also [1] for
+//            // non-repeat elements).
+//            //
+//            // The contextGroupRef is now also valid for the top-level form.
+//            //
+//            // The repeatGroupRef is null if we are not skipping a repeat
+//            // section.
+//            //
+//            String repeatGroupRef = null;
 
-            event_search:
             while (event != FormEntryController.EVENT_END_OF_FORM) {
-
-                // get the ref to this element
-                String currentRef = formController.getFormIndex().getReference().toString(true);
-
-                // retrieve the current group
-                String curGroup = (repeatGroupRef == null) ? contextGroupRef : repeatGroupRef;
-
-                if (!currentRef.startsWith(curGroup)) {
-                    // We have left the current group
-                    if (repeatGroupRef == null) {
-                        // We are done.
-                        break;
-                    } else {
-                        // exit the inner repeat group
-                        repeatGroupRef = null;
-                    }
-                }
-
-                if (repeatGroupRef != null) {
-                    // We're in a repeat group within the one we want to list
-                    // skip this question/group/repeat and move to the next index.
-                    event =
-                            formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-                    continue;
-                }
+//                // get the ref to this element
+//                String currentRef = formController.getFormIndex().getReference().toString(true);
+//
+//                // retrieve the current group
+//                String curGroup = (repeatGroupRef == null) ? contextGroupRef : repeatGroupRef;
+//
+//                if (!currentRef.startsWith(curGroup)) {
+//                    // We have left the current group
+//                    if (repeatGroupRef == null) {
+//                        // We are done.
+//                        break;
+//                    } else {
+//                        // exit the inner repeat group
+//                        repeatGroupRef = null;
+//                    }
+//                }
+//
+//                if (repeatGroupRef != null) {
+//                    // We're in a repeat group within the one we want to list
+//                    // skip this question/group/repeat and move to the next index.
+//                    event =
+//                            formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+//                    continue;
+//                }
 
                 switch (event) {
                     case FormEntryController.EVENT_QUESTION:
@@ -338,8 +335,9 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                         break;
                     case FormEntryController.EVENT_REPEAT:
                         FormEntryCaption fc = formController.getCaptionPrompt();
-                        // push this repeat onto the stack.
-                        repeatGroupRef = currentRef;
+//                        // push this repeat onto the stack.
+//                        repeatGroupRef = currentRef;
+
                         // Because of the guard conditions above, we will skip
                         // everything until we exit this repeat.
                         //
