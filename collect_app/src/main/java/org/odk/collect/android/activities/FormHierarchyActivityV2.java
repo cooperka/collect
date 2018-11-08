@@ -16,6 +16,7 @@ package org.odk.collect.android.activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
@@ -26,7 +27,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
 import org.javarosa.core.model.FormIndex;
 import org.javarosa.core.model.GroupDef;
 import org.javarosa.form.api.FormEntryCaption;
@@ -40,11 +40,10 @@ import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.logic.HierarchyElement;
 import org.odk.collect.android.utilities.FormEntryPromptUtils;
 import org.odk.collect.android.views.ODKView;
+import timber.log.Timber;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import timber.log.Timber;
 
 /**
  * Displays the structure of a form along with the answers for the current instance. Different form
@@ -67,6 +66,8 @@ import timber.log.Timber;
  * Buttons at the bottom of the screen allow users to navigate the form.
  */
 public class FormHierarchyActivityV2 extends CollectAbstractActivity {
+    public static String EXTRA_INDEX = "EXTRA_INDEX";
+
     /**
      * The questions and repeats at the current level. If a repeat is expanded, also includes the
      * instances of that repeat. Recreated every time {@link #refreshView()} is called. Modified

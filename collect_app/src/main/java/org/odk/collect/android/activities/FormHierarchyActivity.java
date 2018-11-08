@@ -16,6 +16,7 @@ package org.odk.collect.android.activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
@@ -45,6 +46,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import timber.log.Timber;
+
+import static org.odk.collect.android.activities.FormHierarchyActivityV2.EXTRA_INDEX;
 
 /**
  * Displays the structure of a form along with the answers for the current instance. Different form
@@ -394,22 +397,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
         switch (element.getType()) {
             case EXPANDED:
-                element.setType(HierarchyElement.Type.COLLAPSED);
-                ArrayList<HierarchyElement> children = element.getChildren();
-                for (int i = 0; i < children.size(); i++) {
-                    elementsToDisplay.remove(position + 1);
-                }
-                element.setIcon(ContextCompat.getDrawable(this, R.drawable.expander_ic_minimized));
-                break;
             case COLLAPSED:
-                element.setType(HierarchyElement.Type.EXPANDED);
-                ArrayList<HierarchyElement> children1 = element.getChildren();
-                for (int i = 0; i < children1.size(); i++) {
-                    Timber.i("adding child: %s", children1.get(i).getFormIndex());
-                    elementsToDisplay.add(position + 1 + i, children1.get(i));
-
-                }
-                element.setIcon(ContextCompat.getDrawable(this, R.drawable.expander_ic_maximized));
+                onRepeatGroupClicked(index);
                 break;
             case QUESTION:
                 onQuestionClicked(index);
@@ -442,6 +431,16 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         }
         setResult(RESULT_OK);
         finish();
+    }
+
+    /**
+     * Handles clicks on a repeat group.
+     * Shows a new activity listing the instances of that group.
+     */
+    void onRepeatGroupClicked(FormIndex index) {
+        Intent intent = new Intent(this, FormHierarchyActivityV2.class);
+        intent.putExtra(EXTRA_INDEX, index);
+        startActivity(intent);
     }
 
     /**
