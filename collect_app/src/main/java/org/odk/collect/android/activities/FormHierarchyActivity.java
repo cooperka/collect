@@ -47,8 +47,6 @@ import java.util.List;
 
 import timber.log.Timber;
 
-import static org.odk.collect.android.activities.FormHierarchyActivityV2.EXTRA_INDEX;
-
 /**
  * Displays the structure of a form along with the answers for the current instance. Different form
  * elements are displayed in the following ways:
@@ -64,15 +62,14 @@ import static org.odk.collect.android.activities.FormHierarchyActivityV2.EXTRA_I
  * Tapping on a question sets the app-wide current question to that question and terminates the
  * activity, returning to {@link FormEntryActivity}.
  *
- * Although the user gets the impression of navigating "into" a repeat, the view is refreshed in
- * {@link #refreshView()} rather than another activity/fragment being added to the backstack.
- *
  * Buttons at the bottom of the screen allow users to navigate the form.
  */
 public class FormHierarchyActivity extends CollectAbstractActivity {
+    public static String EXTRA_INDEX = "EXTRA_INDEX";
+
     /**
      * The questions and repeats at the current level. If a repeat is expanded, also includes the
-     * instances of that repeat. Recreated every time {@link #refreshView()} is called. Modified
+     * instances of that repeat. Recreated every time {@link #refreshView} is called. Modified
      * by the expand/collapse behavior in {@link #onElementClick(HierarchyElement)}.
      */
     private List<HierarchyElement> elementsToDisplay;
@@ -124,7 +121,12 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             return;
         }
 
-        startIndex = formController.getFormIndex();
+        Intent intent = getIntent();
+        startIndex = (FormIndex) intent.getSerializableExtra(EXTRA_INDEX);
+
+        if (startIndex == null) {
+            startIndex = formController.getFormIndex();
+        }
 
         setTitle(formController.getFormTitle());
 
@@ -135,7 +137,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         jumpEndButton = findViewById(R.id.jumpEndButton);
 
         configureButtons(formController);
-        refreshView();
+        refreshView(startIndex);
 
         // Scroll to the last question the user was looking at
         // TODO: avoid another iteration through all displayed elements
@@ -183,9 +185,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
     }
 
     protected void goUpLevel() {
-        Collect.getInstance().getFormController().stepToOuterScreenEvent();
-
-        refreshView();
+        setResult(RESULT_OK);
+        finish();
     }
 
     /**
@@ -210,11 +211,11 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
      * FormController's current index. This index is either set prior to the activity opening or
      * mutated by {@link #onElementClick(HierarchyElement)} if a repeat instance was tapped.
      */
-    public void refreshView() {
+    public void refreshView(FormIndex index) {
         try {
             FormController formController = Collect.getInstance().getFormController();
             // Record the current index so we can return to the same place if the user hits 'back'.
-            currentIndex = formController.getFormIndex();
+            currentIndex = index;
 
             // If we're not at the first level, we're inside a repeated group so we want to only
             // display
@@ -398,15 +399,13 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         switch (element.getType()) {
             case EXPANDED:
             case COLLAPSED:
-                onRepeatGroupClicked(index);
-                break;
+                onItemClicked(index);
+                return;
             case QUESTION:
                 onQuestionClicked(index);
                 return;
             case CHILD:
-                Collect.getInstance().getFormController().jumpToIndex(element.getFormIndex());
-                setResult(RESULT_OK);
-                refreshView();
+                onItemClicked(index);
                 return;
         }
 
@@ -434,11 +433,11 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
     }
 
     /**
-     * Handles clicks on a repeat group.
-     * Shows a new activity listing the instances of that group.
+     * Handles clicks on a repeat group or repeat group child.
+     * Starts a new activity with that index.
      */
-    void onRepeatGroupClicked(FormIndex index) {
-        Intent intent = new Intent(this, FormHierarchyActivityV2.class);
+    void onItemClicked(FormIndex index) {
+        Intent intent = new Intent(this, FormHierarchyActivity.class);
         intent.putExtra(EXTRA_INDEX, index);
         startActivity(intent);
     }
