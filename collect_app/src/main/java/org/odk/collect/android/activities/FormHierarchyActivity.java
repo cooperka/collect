@@ -351,8 +351,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                             // Display the repeat header for the group.
                             HierarchyElement group =
                                     new HierarchyElement(getLabel(fc), null, ContextCompat
-                                            .getDrawable(this, R.drawable.expander_ic_minimized),
-                                            HierarchyElement.Type.COLLAPSED, fc.getIndex());
+                                            .getDrawable(this, R.drawable.expander_ic_maximized),
+                                            HierarchyElement.Type.EXPANDED, fc.getIndex());
                             elementsToDisplay.add(group);
                         }
                         String repeatLabel = getLabel(fc);
@@ -366,7 +366,9 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                         repeatLabel += " (" + (fc.getMultiplicity() + 1) + ")\u200E";
                         // Add this group name to the drop down list for this repeating group.
                         HierarchyElement h = elementsToDisplay.get(elementsToDisplay.size() - 1);
-                        h.addChild(new HierarchyElement(repeatLabel, null, null, HierarchyElement.Type.CHILD, fc.getIndex()));
+                        HierarchyElement childElement = new HierarchyElement(repeatLabel, null, null, HierarchyElement.Type.CHILD, fc.getIndex());
+                        h.addChild(childElement);
+                        elementsToDisplay.add(childElement);
                         break;
                 }
                 event =
