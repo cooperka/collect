@@ -128,6 +128,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             startIndex = formController.getFormIndex();
         }
 
+        System.out.println("@@@ Activity index: " + startIndex);
+
         setTitle(formController.getFormTitle());
 
         groupPathTextView = findViewById(R.id.pathtext);
@@ -256,7 +258,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 //                }
 //            }
 
-            int event = formController.getEvent();
+            int event = formController.jumpToIndex(currentIndex);
             if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
                 // The beginning of form has no valid prompt to display.
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
@@ -376,8 +378,6 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             }
 
             recyclerView.setAdapter(new HierarchyListAdapter(elementsToDisplay, this::onElementClick));
-
-            formController.jumpToIndex(currentIndex);
         } catch (Exception e) {
             Timber.e(e);
             createErrorDialog(e.getMessage());
