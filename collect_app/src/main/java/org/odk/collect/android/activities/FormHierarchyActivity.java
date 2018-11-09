@@ -245,9 +245,13 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         FormIndex hierarchyStartIndex = formController.getFormIndex();
 
         // Return to where we started in order to keep state unchanged.
-//        formController.jumpToIndex(startIndex);
+        formController.jumpToIndex(startIndex);
 
         return hierarchyStartIndex;
+    }
+
+    private String getGroupName(FormIndex index) {
+        return index.getReference().toString(true);
     }
 
     private String getGroupName(FormController formController) {
@@ -256,6 +260,20 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
     private String getParentGroupName(FormController formController) {
         return formController.getFormIndex().getReference().getParentRef().toString(true);
+    }
+
+    private FormIndex getNextIndex(FormIndex index) {
+        FormController formController = Collect.getInstance().getFormController();
+        FormIndex startIndex = formController.getFormIndex();
+
+        formController.jumpToIndex(index);
+        formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+        FormIndex nextIndex = formController.getFormIndex();
+
+        // Return to where we started in order to keep state unchanged.
+        formController.jumpToIndex(startIndex);
+
+        return nextIndex;
     }
 
     /**
@@ -269,9 +287,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
             elementsToDisplay = new ArrayList<>();
 
-            FormIndex hierarchyStartIndex = getHierarchyStartIndex(startIndex);
-
-            int event = formController.getEvent(hierarchyStartIndex);
+            FormIndex currIndex = getHierarchyStartIndex(startIndex);
+            int event = formController.getEvent(currIndex);
 
             if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
                 groupPathTextView.setVisibility(View.GONE);
@@ -295,7 +312,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
             while (event != FormEntryController.EVENT_END_OF_FORM) {
                 // get the ref to this element
-                String currentRef = getGroupName(formController);
+                String currentRef = getGroupName(currIndex);
 
                 // retrieve the current group
                 String curGroup = (repeatGroupRef == null) ? groupName : repeatGroupRef;
@@ -314,13 +331,15 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                 if (repeatGroupRef != null) {
                     // We're in a repeat group within the one we want to list
                     // skip this question/group/repeat and move to the next index.
-                    event = formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+                    currIndex = getNextIndex(currIndex);
+                    event = formController.getEvent(currIndex);
                     continue;
                 }
 
                 switch (event) {
                     case FormEntryController.EVENT_QUESTION:
 
+                        // TODO: Stuff like this needs to be stateless too.
                         FormEntryPrompt fp = formController.getQuestionPrompt();
                         String label = getLabel(fp);
                         if (!fp.isReadOnly() || (label != null && label.length() > 0)) {
@@ -364,7 +383,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                         }
                         String repeatLabel = getLabel(fc);
                         if (fc.getFormElement().getChildren().size() == 1 && fc.getFormElement().getChild(0) instanceof GroupDef) {
-                            formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+                            currIndex = getNextIndex(currIndex);
                             FormEntryCaption fc2 = formController.getCaptionPrompt();
                             if (getLabel(fc2) != null) {
                                 repeatLabel = getLabel(fc2);
@@ -378,13 +397,12 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                         elementsToDisplay.add(childElement);
                         break;
                 }
-                event =
-                        formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+
+                currIndex = getNextIndex(currIndex);
+                event = formController.getEvent(currIndex);
             }
 
             recyclerView.setAdapter(new HierarchyListAdapter(elementsToDisplay, this::onElementClick));
-
-            formController.jumpToIndex(startIndex);
         } catch (Exception e) {
             Timber.e(e);
             createErrorDialog(e.getMessage(), startIndex);
