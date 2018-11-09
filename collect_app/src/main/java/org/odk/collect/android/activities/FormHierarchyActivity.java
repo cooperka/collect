@@ -80,6 +80,9 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
      */
     private TextView groupPathTextView;
 
+    /** Current group reference name. */
+    private String groupName;
+
     protected Button jumpPreviousButton;
     protected Button jumpBeginningButton;
     protected Button jumpEndButton;
@@ -202,8 +205,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
         // If we're not at the first level, we're inside a repeated group so we want to only
         // display everything enclosed within that group.
-        // TODO: Use this var again.
-        String groupName = "";
+        groupName = "";
 
         // If we're currently at a repeat node, record the name of the node and step to the next
         // node to display.
