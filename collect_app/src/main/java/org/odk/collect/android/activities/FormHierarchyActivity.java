@@ -233,12 +233,10 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
             // now test again for repeat. This should be true at this point or we're at the
             // beginning
-            if (event == FormEntryController.EVENT_REPEAT) {
+            if (event == FormEntryController.EVENT_REPEAT
+                    || event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
                 groupName = getGroupName(formController);
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-            } else if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
-                formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-                groupName = getParentGroupName(formController);
             }
         }
 
@@ -252,10 +250,6 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
     private String getGroupName(FormController formController) {
         return formController.getFormIndex().getReference().toString(true);
-    }
-
-    private String getParentGroupName(FormController formController) {
-        return formController.getFormIndex().getReference().getParentRef().toString(true);
     }
 
     /**
