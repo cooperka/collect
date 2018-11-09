@@ -242,7 +242,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 //                }
 //            }
 
-            int event = formController.jumpToIndex(index);
+            int event = formController.getEvent(index);
             if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
                 // The beginning of form has no valid prompt to display.
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
