@@ -238,7 +238,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
             } else if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-                groupName = getGroupName(formController);
+                groupName = getParentGroupName(formController);
             }
         }
 
@@ -252,6 +252,10 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
     private String getGroupName(FormController formController) {
         return formController.getFormIndex().getReference().toString(true);
+    }
+
+    private String getParentGroupName(FormController formController) {
+        return formController.getFormIndex().getReference().getParentRef().toString(true);
     }
 
     /**
