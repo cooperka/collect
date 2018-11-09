@@ -245,7 +245,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         FormIndex hierarchyStartIndex = formController.getFormIndex();
 
         // Return to where we started in order to keep state unchanged.
-        formController.jumpToIndex(startIndex);
+//        formController.jumpToIndex(startIndex);
 
         return hierarchyStartIndex;
     }
@@ -282,44 +282,41 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                 jumpPreviousButton.setEnabled(true);
             }
 
-//            // Big change from prior implementation:
-//            //
-//            // The ref strings now include the instance number designations
-//            // i.e., [0], [1], etc. of the repeat groups (and also [1] for
-//            // non-repeat elements).
-//            //
-//            // The groupName is now also valid for the top-level form.
-//            //
-//            // The repeatGroupRef is null if we are not skipping a repeat
-//            // section.
-//            //
-//            String repeatGroupRef = null;
+            // The ref strings now include the instance number designations
+            // i.e., [0], [1], etc. of the repeat groups (and also [1] for
+            // non-repeat elements).
+            //
+            // The groupName is now also valid for the top-level form.
+            //
+            // The repeatGroupRef is null if we are not skipping a repeat
+            // section.
+            //
+            String repeatGroupRef = null;
 
             while (event != FormEntryController.EVENT_END_OF_FORM) {
-//                // get the ref to this element
-//                String currentRef = formController.getFormIndex().getReference().toString(true);
-//
-//                // retrieve the current group
-//                String curGroup = (repeatGroupRef == null) ? groupName : repeatGroupRef;
-//
-//                if (!currentRef.startsWith(curGroup)) {
-//                    // We have left the current group
-//                    if (repeatGroupRef == null) {
-//                        // We are done.
-//                        break;
-//                    } else {
-//                        // exit the inner repeat group
-//                        repeatGroupRef = null;
-//                    }
-//                }
-//
-//                if (repeatGroupRef != null) {
-//                    // We're in a repeat group within the one we want to list
-//                    // skip this question/group/repeat and move to the next index.
-//                    event =
-//                            formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-//                    continue;
-//                }
+                // get the ref to this element
+                String currentRef = getGroupName(formController);
+
+                // retrieve the current group
+                String curGroup = (repeatGroupRef == null) ? groupName : repeatGroupRef;
+
+                if (!currentRef.startsWith(curGroup)) {
+                    // We have left the current group
+                    if (repeatGroupRef == null) {
+                        // We are done.
+                        break;
+                    } else {
+                        // exit the inner repeat group
+                        repeatGroupRef = null;
+                    }
+                }
+
+                if (repeatGroupRef != null) {
+                    // We're in a repeat group within the one we want to list
+                    // skip this question/group/repeat and move to the next index.
+                    event = formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+                    continue;
+                }
 
                 switch (event) {
                     case FormEntryController.EVENT_QUESTION:
@@ -344,8 +341,9 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                         break;
                     case FormEntryController.EVENT_REPEAT:
                         FormEntryCaption fc = formController.getCaptionPrompt();
-//                        // push this repeat onto the stack.
-//                        repeatGroupRef = currentRef;
+
+                        // push this repeat onto the stack.
+                        repeatGroupRef = currentRef;
 
                         // Because of the guard conditions above, we will skip
                         // everything until we exit this repeat.
@@ -385,6 +383,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             }
 
             recyclerView.setAdapter(new HierarchyListAdapter(elementsToDisplay, this::onElementClick));
+
+            formController.jumpToIndex(startIndex);
         } catch (Exception e) {
             Timber.e(e);
             createErrorDialog(e.getMessage(), startIndex);
