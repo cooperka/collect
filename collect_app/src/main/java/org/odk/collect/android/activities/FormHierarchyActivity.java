@@ -195,6 +195,59 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
     }
 
     /**
+     * Determines the start of this hierarchy view based on where the user came from.
+     */
+    private FormIndex getHierarchyStartIndex(FormIndex startIndex) {
+        FormController formController = Collect.getInstance().getFormController();
+
+        // If we're not at the first level, we're inside a repeated group so we want to only
+        // display everything enclosed within that group.
+        // TODO: Use this var again.
+        String groupName = "";
+
+        // If we're currently at a repeat node, record the name of the node and step to the next
+        // node to display.
+        if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
+            groupName = getGroupName(formController);
+            formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+        } else {
+            FormIndex potentialStartIndex = formController.stepIndexOut(startIndex);
+            // If we have a 'group' tag, we want to step back until we hit a repeat or the
+            // beginning.
+            while (potentialStartIndex != null
+                    && formController.getEvent(potentialStartIndex) == FormEntryController.EVENT_GROUP) {
+                potentialStartIndex = formController.stepIndexOut(potentialStartIndex);
+            }
+            if (potentialStartIndex == null) {
+                // check to see if the question is at the first level of the hierarchy. If it
+                // is, display the root level from the beginning.
+                formController.jumpToIndex(FormIndex.createBeginningOfFormIndex());
+            } else {
+                // otherwise we're at a repeated group
+                formController.jumpToIndex(potentialStartIndex);
+            }
+
+            // now test again for repeat. This should be true at this point or we're at the
+            // beginning
+            if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
+                groupName = getGroupName(formController);
+                formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+            }
+        }
+
+        FormIndex hierarchyStartIndex = formController.getFormIndex();
+
+        // Return to where we started in order to keep state unchanged.
+        formController.jumpToIndex(startIndex);
+
+        return hierarchyStartIndex;
+    }
+
+    private String getGroupName(FormController formController) {
+        return formController.getFormIndex().getReference().toString(true);
+    }
+
+    /**
      * Rebuilds the view to reflect the elements that should be displayed based on the
      * FormController's current index. This index is either set prior to the activity opening or
      * mutated by {@link #onElementClick(HierarchyElement)} if a repeat instance was tapped.
@@ -205,45 +258,9 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
             elementsToDisplay = new ArrayList<>();
 
-            // If we're not at the first level, we're inside a repeated group so we want to only
-            // display everything enclosed within that group.
-            String groupName = "";
+            FormIndex hierarchyStartIndex = getHierarchyStartIndex(startIndex);
 
-//            // If we're currently at a repeat node, record the name of the node and step to the next
-//            // node to display.
-//            if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
-//                groupName =
-//                        formController.getFormIndex().getReference().toString(true);
-//                formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-//            } else {
-//                FormIndex startTest = formController.stepIndexOut(currentIndex);
-//                // If we have a 'group' tag, we want to step back until we hit a repeat or the
-//                // beginning.
-//                while (startTest != null
-//                        && formController.getEvent(startTest) == FormEntryController.EVENT_GROUP) {
-//                    startTest = formController.stepIndexOut(startTest);
-//                }
-//                if (startTest == null) {
-//                    // check to see if the question is at the first level of the hierarchy. If it
-//                    // is,
-//                    // display the root level from the beginning.
-//                    formController.jumpToIndex(FormIndex
-//                            .createBeginningOfFormIndex());
-//                } else {
-//                    // otherwise we're at a repeated group
-//                    formController.jumpToIndex(startTest);
-//                }
-//
-//                // now test again for repeat. This should be true at this point or we're at the
-//                // beginning
-//                if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
-//                    groupName =
-//                            formController.getFormIndex().getReference().toString(true);
-//                    formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-//                }
-//            }
-
-            int event = formController.getEvent(startIndex);
+            int event = formController.getEvent(hierarchyStartIndex);
             if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
                 // The beginning of form has no valid prompt to display.
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
