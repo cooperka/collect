@@ -199,14 +199,15 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
      * FormController's current index. This index is either set prior to the activity opening or
      * mutated by {@link #onElementClick(HierarchyElement)} if a repeat instance was tapped.
      */
-    public void refreshView(FormIndex index) {
+    public void refreshView(FormIndex startIndex) {
         try {
             FormController formController = Collect.getInstance().getFormController();
+
+            elementsToDisplay = new ArrayList<>();
 
 //            // If we're not at the first level, we're inside a repeated group so we want to only
 //            // display everything enclosed within that group.
 //            String contextGroupRef = "";
-            elementsToDisplay = new ArrayList<>();
 
 //            // If we're currently at a repeat node, record the name of the node and step to the next
 //            // node to display.
@@ -242,7 +243,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 //                }
 //            }
 
-            int event = formController.getEvent(index);
+            int event = formController.getEvent(startIndex);
             if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
                 // The beginning of form has no valid prompt to display.
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
@@ -364,7 +365,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             recyclerView.setAdapter(new HierarchyListAdapter(elementsToDisplay, this::onElementClick));
         } catch (Exception e) {
             Timber.e(e);
-            createErrorDialog(e.getMessage(), index);
+            createErrorDialog(e.getMessage(), startIndex);
         }
     }
 
