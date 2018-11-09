@@ -66,6 +66,7 @@ import timber.log.Timber;
  */
 public class FormHierarchyActivity extends CollectAbstractActivity {
     public static String EXTRA_INDEX = "EXTRA_INDEX";
+    public static String EXTRA_IS_GROUP = "EXTRA_IS_GROUP";
 
     /**
      * The questions and repeats at the current level. If a repeat is expanded, also includes the
@@ -128,7 +129,10 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             startIndex = formController.getFormIndex();
         }
 
+        boolean isGroup = intent.getBooleanExtra(EXTRA_IS_GROUP, false);
+
         System.out.println("@@@ Activity index: " + startIndex);
+        System.out.println("@@@ isGroup: " + isGroup);
 
         setTitle(formController.getFormTitle());
 
@@ -399,13 +403,13 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         switch (element.getType()) {
             case EXPANDED:
             case COLLAPSED:
-                onItemClicked(index);
+                onRepeatGroupClicked(index);
                 return;
             case QUESTION:
                 onQuestionClicked(index);
                 return;
             case CHILD:
-                onItemClicked(index);
+                onRepeatGroupChildClicked(index);
                 return;
         }
 
@@ -433,10 +437,21 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
     }
 
     /**
-     * Handles clicks on a repeat group or repeat group child.
+     * Handles clicks on a repeat group.
+     * Starts a new activity showing the items in that group.
+     */
+    void onRepeatGroupClicked(FormIndex index) {
+        Intent intent = new Intent(this, FormHierarchyActivity.class);
+        intent.putExtra(EXTRA_INDEX, index);
+        intent.putExtra(EXTRA_IS_GROUP, true);
+        startActivity(intent);
+    }
+
+    /**
+     * Handles clicks on a repeat group child.
      * Starts a new activity with that index.
      */
-    void onItemClicked(FormIndex index) {
+    void onRepeatGroupChildClicked(FormIndex index) {
         Intent intent = new Intent(this, FormHierarchyActivity.class);
         intent.putExtra(EXTRA_INDEX, index);
         startActivity(intent);
