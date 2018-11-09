@@ -227,11 +227,16 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                 formController.jumpToIndex(potentialStartIndex);
             }
 
+            int event = formController.getEvent();
+
             // now test again for repeat. This should be true at this point or we're at the
             // beginning
-            if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
+            if (event == FormEntryController.EVENT_REPEAT) {
                 groupName = getGroupName(formController);
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+            } else if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
+                formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+                groupName = getGroupName(formController);
             }
         }
 
@@ -261,11 +266,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             FormIndex hierarchyStartIndex = getHierarchyStartIndex(startIndex);
 
             int event = formController.getEvent(hierarchyStartIndex);
+
             if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
-                // The beginning of form has no valid prompt to display.
-                formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-//                groupName =
-//                        formController.getFormIndex().getReference().getParentRef().toString(true);
                 groupPathTextView.setVisibility(View.GONE);
                 jumpPreviousButton.setEnabled(false);
             } else {
@@ -273,9 +275,6 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                 groupPathTextView.setText(getCurrentPath());
                 jumpPreviousButton.setEnabled(true);
             }
-
-//            // Refresh the current event in case we did step forward.
-//            event = formController.getEvent();
 
 //            // Big change from prior implementation:
 //            //
