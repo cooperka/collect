@@ -23,7 +23,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -81,20 +80,6 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
      */
     private TextView groupPathTextView;
 
-    /**
-     * The index of the question or the field list the FormController was set to when the hierarchy
-     * was accessed. Used to jump the user back to where they were if applicable.
-     */
-    private FormIndex startIndex;
-
-    /**
-     * The index of the question that is being displayed in the hierarchy. On first launch, it is
-     * the same as {@link #startIndex}. It can then become the index of a repeat instance.
-     * TODO: Is keeping this as a field necessary? I believe what it is used for is to send the user
-     * to edit a question that caused an error in the hierarchy.
-     */
-    private FormIndex currentIndex;
-
     protected Button jumpPreviousButton;
     protected Button jumpBeginningButton;
     protected Button jumpEndButton;
@@ -123,11 +108,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         }
 
         Intent intent = getIntent();
-        startIndex = (FormIndex) intent.getSerializableExtra(EXTRA_INDEX);
-
-        if (startIndex == null) {
-            startIndex = formController.getFormIndex();
-        }
+        FormIndex extraStartIndex = (FormIndex) intent.getSerializableExtra(EXTRA_INDEX);
+        final FormIndex startIndex = extraStartIndex == null ? formController.getFormIndex() : extraStartIndex;
 
         boolean isGroup = intent.getBooleanExtra(EXTRA_IS_GROUP, false);
 
@@ -220,8 +202,6 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
     public void refreshView(FormIndex index) {
         try {
             FormController formController = Collect.getInstance().getFormController();
-            // Record the current index so we can return to the same place if the user hits 'back'.
-            currentIndex = index;
 
 //            // If we're not at the first level, we're inside a repeated group so we want to only
 //            // display everything enclosed within that group.
@@ -262,7 +242,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 //                }
 //            }
 
-            int event = formController.jumpToIndex(currentIndex);
+            int event = formController.jumpToIndex(index);
             if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
                 // The beginning of form has no valid prompt to display.
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
@@ -384,7 +364,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             recyclerView.setAdapter(new HierarchyListAdapter(elementsToDisplay, this::onElementClick));
         } catch (Exception e) {
             Timber.e(e);
-            createErrorDialog(e.getMessage());
+            createErrorDialog(e.getMessage(), index);
         }
     }
 
@@ -428,7 +408,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                 Collect.getInstance().getFormController().stepToPreviousScreenEvent();
             } catch (JavaRosaException e) {
                 Timber.d(e);
-                createErrorDialog(e.getCause().getMessage());
+                createErrorDialog(e.getCause().getMessage(), index);
                 return;
             }
         }
@@ -458,26 +438,9 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
     }
 
     /**
-     * When the device back button is pressed, go back to the previous activity, NOT the previous
-     * level in the hierarchy as the "Go Up" button does.
-     */
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                FormController fc = Collect.getInstance().getFormController();
-                if (fc != null) {
-                    fc.getTimerLogger().exitView();
-                    fc.jumpToIndex(startIndex);
-                }
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    /**
      * Creates and displays dialog with the given errorMsg.
      */
-    protected void createErrorDialog(String errorMsg) {
+    protected void createErrorDialog(String errorMsg, FormIndex returnIndex) {
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
 
         alertDialog.setIcon(android.R.drawable.ic_dialog_info);
@@ -489,7 +452,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                 switch (i) {
                     case DialogInterface.BUTTON_POSITIVE:
                         FormController formController = Collect.getInstance().getFormController();
-                        formController.jumpToIndex(currentIndex);
+                        formController.jumpToIndex(returnIndex);
                         break;
                 }
             }
