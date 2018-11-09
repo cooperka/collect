@@ -205,14 +205,14 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
             elementsToDisplay = new ArrayList<>();
 
-//            // If we're not at the first level, we're inside a repeated group so we want to only
-//            // display everything enclosed within that group.
-//            String contextGroupRef = "";
+            // If we're not at the first level, we're inside a repeated group so we want to only
+            // display everything enclosed within that group.
+            String groupName = "";
 
 //            // If we're currently at a repeat node, record the name of the node and step to the next
 //            // node to display.
 //            if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
-//                contextGroupRef =
+//                groupName =
 //                        formController.getFormIndex().getReference().toString(true);
 //                formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
 //            } else {
@@ -237,7 +237,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 //                // now test again for repeat. This should be true at this point or we're at the
 //                // beginning
 //                if (formController.getEvent() == FormEntryController.EVENT_REPEAT) {
-//                    contextGroupRef =
+//                    groupName =
 //                            formController.getFormIndex().getReference().toString(true);
 //                    formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
 //                }
@@ -247,7 +247,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             if (event == FormEntryController.EVENT_BEGINNING_OF_FORM) {
                 // The beginning of form has no valid prompt to display.
                 formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
-//                contextGroupRef =
+//                groupName =
 //                        formController.getFormIndex().getReference().getParentRef().toString(true);
                 groupPathTextView.setVisibility(View.GONE);
                 jumpPreviousButton.setEnabled(false);
@@ -266,7 +266,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 //            // i.e., [0], [1], etc. of the repeat groups (and also [1] for
 //            // non-repeat elements).
 //            //
-//            // The contextGroupRef is now also valid for the top-level form.
+//            // The groupName is now also valid for the top-level form.
 //            //
 //            // The repeatGroupRef is null if we are not skipping a repeat
 //            // section.
@@ -278,7 +278,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 //                String currentRef = formController.getFormIndex().getReference().toString(true);
 //
 //                // retrieve the current group
-//                String curGroup = (repeatGroupRef == null) ? contextGroupRef : repeatGroupRef;
+//                String curGroup = (repeatGroupRef == null) ? groupName : repeatGroupRef;
 //
 //                if (!currentRef.startsWith(curGroup)) {
 //                    // We have left the current group
