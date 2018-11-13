@@ -82,6 +82,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
     private String groupName;
 
+    private FormIndex showRepeatGroupPickerForIndex;
+
     /**
      * The index of the question or the field list the FormController was set to when the hierarchy
      * was accessed. Used to jump the user back to where they were if applicable.
@@ -273,6 +275,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
             elementsToDisplay = new ArrayList<>();
 
+            boolean shouldShowRepeatGroupPicker = showRepeatGroupPickerForIndex != null;
+
             jumpToHierarchyStartIndex(currentIndex);
 
             int event = formController.getEvent();
@@ -334,6 +338,9 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
                 switch (event) {
                     case FormEntryController.EVENT_QUESTION:
+                        if (shouldShowRepeatGroupPicker) {
+                            break;
+                        }
 
                         FormEntryPrompt fp = formController.getQuestionPrompt();
                         String label = getLabel(fp);
@@ -366,7 +373,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                         // Only the [0] emits the repeat header.
                         // Every one displays the descend-into action element.
 
-                        if (fc.getMultiplicity() == 0) {
+                        if (fc.getMultiplicity() == 0 && !shouldShowRepeatGroupPicker) {
                             // Display the repeat header for the group.
                             HierarchyElement group =
                                     new HierarchyElement(getLabel(fc), null, ContextCompat
@@ -383,9 +390,12 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                             }
                         }
                         repeatLabel += " (" + (fc.getMultiplicity() + 1) + ")\u200E";
-                        // Add this group name to the drop down list for this repeating group.
-                        HierarchyElement h = elementsToDisplay.get(elementsToDisplay.size() - 1);
-                        h.addChild(new HierarchyElement(repeatLabel, null, null, HierarchyElement.Type.CHILD, fc.getIndex()));
+
+                        if (shouldShowRepeatGroupPicker) {
+                            HierarchyElement childElement = new HierarchyElement(repeatLabel, null, null, HierarchyElement.Type.CHILD, fc.getIndex());
+                            elementsToDisplay.add(childElement);
+                        }
+
                         break;
                 }
                 event =
@@ -410,20 +420,22 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
      * questions shown
      */
     public void onElementClick(HierarchyElement element) {
+        FormController formController = Collect.getInstance().getFormController();
         int position = elementsToDisplay.indexOf(element);
         FormIndex index = element.getFormIndex();
 
         switch (element.getType()) {
             case EXPANDED:
             case COLLAPSED:
-                Collect.getInstance().getFormController().jumpToIndex(index);
+                showRepeatGroupPickerForIndex = index;
                 refreshView();
                 break;
             case QUESTION:
                 onQuestionClicked(index);
                 return;
             case CHILD:
-                Collect.getInstance().getFormController().jumpToIndex(index);
+                showRepeatGroupPickerForIndex = null;
+                formController.jumpToIndex(index);
                 setResult(RESULT_OK);
                 refreshView();
                 return;
