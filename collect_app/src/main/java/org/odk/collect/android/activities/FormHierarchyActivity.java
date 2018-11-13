@@ -82,7 +82,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
     private String groupName;
 
-    private FormIndex showRepeatGroupPickerForIndex;
+    private String showRepeatGroupPickerForRef;
 
     /**
      * The index of the question or the field list the FormController was set to when the hierarchy
@@ -253,6 +253,10 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         return index.getReference().toString(true);
     }
 
+    private String getUnindexedGroupName(FormIndex index) {
+        return index.getReference().toString(false);
+    }
+
     private String getGroupName(FormController formController) {
         return formController.getFormIndex().getReference().toString(true);
     }
@@ -275,7 +279,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
             elementsToDisplay = new ArrayList<>();
 
-            boolean shouldShowRepeatGroupPicker = showRepeatGroupPickerForIndex != null;
+            boolean shouldShowRepeatGroupPicker = showRepeatGroupPickerForRef != null;
 
             jumpToHierarchyStartIndex(currentIndex);
 
@@ -312,7 +316,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             while (event != FormEntryController.EVENT_END_OF_FORM) {
 
                 // get the ref to this element
-                String currentRef = formController.getFormIndex().getReference().toString(true);
+                String currentRef = getGroupName(formController);
 
                 // retrieve the current group
                 String curGroup = (repeatGroupRef == null) ? groupName : repeatGroupRef;
@@ -373,6 +377,11 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                         // Only the [0] emits the repeat header.
                         // Every one displays the descend-into action element.
 
+                        // Don't render other groups' children.
+                        if (shouldShowRepeatGroupPicker && !repeatGroupRef.startsWith(showRepeatGroupPickerForRef)) {
+                            break;
+                        }
+
                         if (fc.getMultiplicity() == 0 && !shouldShowRepeatGroupPicker) {
                             // Display the repeat header for the group.
                             HierarchyElement group =
@@ -427,14 +436,14 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         switch (element.getType()) {
             case EXPANDED:
             case COLLAPSED:
-                showRepeatGroupPickerForIndex = index;
+                showRepeatGroupPickerForRef = getUnindexedGroupName(index);
                 refreshView();
                 break;
             case QUESTION:
                 onQuestionClicked(index);
                 return;
             case CHILD:
-                showRepeatGroupPickerForIndex = null;
+                showRepeatGroupPickerForRef = null;
                 formController.jumpToIndex(index);
                 setResult(RESULT_OK);
                 refreshView();
