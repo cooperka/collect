@@ -629,6 +629,19 @@ public class FormController {
     }
 
     /**
+     * Move the current form index to the repeat prompt for the current repeat group
+     * (or the end if none is found).
+     */
+    public int stepToRepeatPromptEvent() {
+        int event = getEvent();
+        do {
+            if (event == FormEntryController.EVENT_END_OF_FORM) break;
+            event = stepToNextEvent(FormController.STEP_OVER_GROUP);
+        } while (event != FormEntryController.EVENT_PROMPT_NEW_REPEAT);
+        return event;
+    }
+
+    /**
      * Move the current form index to the index of the first enclosing repeat
      * or to the start of the form.
      */

@@ -216,6 +216,8 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_add_child:
+                FormIndex repeatPromptIndex = getRepeatPromptIndex(repeatGroupPickerIndex);
+                exitToIndex(repeatPromptIndex);
                 return true;
             case R.id.menu_go_up:
                 goUpLevel();
@@ -296,6 +298,35 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         } else {
             return path;
         }
+    }
+
+    /**
+     * Return the index of the "prompt" to add a new child to the given repeat group.
+     */
+    private FormIndex getRepeatPromptIndex(FormIndex repeatIndex) {
+        FormController formController = Collect.getInstance().getFormController();
+        FormIndex originalIndex = formController.getFormIndex();
+
+        formController.jumpToIndex(repeatIndex);
+        String repeatRef = getUnindexedGroupRef(repeatIndex);
+        String testRef = "";
+
+        // There may be nested repeat groups within this group; skip over those.
+        while (!repeatRef.equals(testRef) && formController.getEvent() != FormEntryController.EVENT_END_OF_FORM) {
+            formController.stepToRepeatPromptEvent();
+            testRef = getUnindexedGroupRef(formController.getFormIndex());
+        }
+
+        if (formController.getEvent() != FormEntryController.EVENT_END_OF_FORM) {
+            Timber.w("Failed to find repeat prompt, got end of form instead.");
+        }
+
+        FormIndex endIndex = formController.getFormIndex();
+
+        // Reset to where we started from.
+        formController.jumpToIndex(originalIndex);
+
+        return endIndex;
     }
 
     /**
@@ -585,6 +616,15 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                 return;
             }
         }
+        setResult(RESULT_OK);
+        finish();
+    }
+
+    /**
+     * Jumps to the form filling view with the given index shown.
+     */
+    void exitToIndex(FormIndex index) {
+        Collect.getInstance().getFormController().jumpToIndex(index);
         setResult(RESULT_OK);
         finish();
     }
