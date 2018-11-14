@@ -313,6 +313,10 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         return formController.getFormIndex().getReference().getParentRef().toString(true);
     }
 
+    private String getUnindexedGroupRef(FormController formController) {
+        return getUnindexedGroupRef(formController.getFormIndex());
+    }
+
     private String getUnindexedGroupRef(FormIndex index) {
         return index.getReference().toString(false);
     }
@@ -374,6 +378,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
 
                 // get the ref to this element
                 String currentRef = getGroupRef(formController);
+                String currentUnindexedRef = getUnindexedGroupRef(formController);
 
                 // retrieve the current group
                 String curGroup = (repeatGroupRef == null) ? contextGroupRef : repeatGroupRef;
@@ -437,7 +442,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
                         if (shouldShowRepeatGroupPicker) {
                             // Don't render other groups' children.
                             String repeatGroupPickerRef = getUnindexedGroupRef(repeatGroupPickerIndex);
-                            if (!repeatGroupRef.startsWith(repeatGroupPickerRef)) {
+                            if (!currentUnindexedRef.startsWith(repeatGroupPickerRef)) {
                                 break;
                             }
 
