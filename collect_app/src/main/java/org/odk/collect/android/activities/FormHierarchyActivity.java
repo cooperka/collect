@@ -212,6 +212,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
             case R.id.menu_add_child:
                 return true;
             case R.id.menu_go_up:
+                goUpLevel();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
