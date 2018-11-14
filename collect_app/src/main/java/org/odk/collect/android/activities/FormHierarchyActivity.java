@@ -200,10 +200,16 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         // Menu will be updated automatically once it's been prepared.
         if (optionsMenu == null) return;
 
-        boolean shouldShowRepeatGroupPicker = repeatGroupPickerIndex != null;
+        FormController formController = Collect.getInstance().getFormController();
+        int event = formController.getEvent();
+        // TODO: Possible race condition
+        boolean isAtBeginning = event == FormEntryController.EVENT_BEGINNING_OF_FORM;
 
+        boolean shouldShowRepeatGroupPicker = repeatGroupPickerIndex != null;
         optionsMenu.findItem(R.id.menu_add_child).setVisible(shouldShowRepeatGroupPicker).setEnabled(shouldShowRepeatGroupPicker);
-        optionsMenu.findItem(R.id.menu_go_up).setVisible(shouldShowRepeatGroupPicker).setEnabled(shouldShowRepeatGroupPicker);
+
+        boolean shouldShowGoUp = shouldShowRepeatGroupPicker || !isAtBeginning;
+        optionsMenu.findItem(R.id.menu_go_up).setVisible(shouldShowGoUp).setEnabled(shouldShowGoUp);
     }
 
     @Override
