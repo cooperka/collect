@@ -205,10 +205,10 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         // TODO: Possible race condition
         boolean isAtBeginning = event == FormEntryController.EVENT_BEGINNING_OF_FORM;
 
-        boolean shouldShowRepeatGroupPicker = repeatGroupPickerIndex != null;
-        optionsMenu.findItem(R.id.menu_add_child).setVisible(shouldShowRepeatGroupPicker).setEnabled(shouldShowRepeatGroupPicker);
+        boolean shouldShowPicker = shouldShowRepeatGroupPicker();
+        optionsMenu.findItem(R.id.menu_add_child).setVisible(shouldShowPicker).setEnabled(shouldShowPicker);
 
-        boolean shouldShowGoUp = shouldShowRepeatGroupPicker || !isAtBeginning;
+        boolean shouldShowGoUp = shouldShowPicker || !isAtBeginning;
         optionsMenu.findItem(R.id.menu_go_up).setVisible(shouldShowGoUp).setEnabled(shouldShowGoUp);
     }
 
