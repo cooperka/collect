@@ -12,17 +12,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO: Temporary icon -->
     <item
         android:id="@+id/menu_add_child"
-        android:icon="@drawable/ic_add_location"
+        android:icon="@drawable/ic_add_circle"
         android:title="@string/add_another_menu"
         app:showAsAction="always"/>
 
-    <!-- TODO: Temporary icon -->
     <item
         android:id="@+id/menu_go_up"
-        android:icon="@drawable/ic_navigate_back"
+        android:icon="@drawable/ic_arrow_upward"
         android:title="@string/jump_to_previous"
         app:showAsAction="always"/>
 
