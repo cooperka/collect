@@ -203,7 +203,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         FormController formController = Collect.getInstance().getFormController();
         int event = formController.getEvent();
         // TODO: Possible race condition
-        boolean isAtBeginning = event == FormEntryController.EVENT_BEGINNING_OF_FORM;
+        boolean isAtBeginning = event == FormEntryController.EVENT_BEGINNING_OF_FORM && !shouldShowRepeatGroupPicker();
 
         boolean shouldShowPicker = shouldShowRepeatGroupPicker();
         optionsMenu.findItem(R.id.menu_add_child).setVisible(shouldShowPicker).setEnabled(shouldShowPicker);
