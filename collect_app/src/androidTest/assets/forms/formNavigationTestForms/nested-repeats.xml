@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<h:html xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:jr="http://openrosa.org/javarosa" xmlns:odk="http://www.opendatakit.org/xforms"
+    xmlns:orx="http://openrosa.org/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://www.w3.org/2002/xforms">
+    <h:head>
+        <h:title>nested-repeats</h:title>
+        <model>
+            <instance>
+                <nested-repeats id="nested-repeats">
+                    <intro />
+                    <friends_intro />
+                    <friends jr:template="">
+                        <friends_label>
+                            <friend_count />
+                            <friend_name />
+                            <pets_intro />
+                            <pets jr:template="">
+                                <pets_label>
+                                    <pet_count />
+                                    <pet_name />
+                                </pets_label>
+                            </pets>
+                        </friends_label>
+                    </friends>
+                    <enemies jr:template="">
+                        <enemies_label>
+                            <enemy_count />
+                            <enemy_name />
+                        </enemies_label>
+                    </enemies>
+                    <meta>
+                        <instanceID />
+                    </meta>
+                </nested-repeats>
+            </instance>
+            <bind nodeset="/nested-repeats/intro" readonly="true()" type="string" />
+            <bind nodeset="/nested-repeats/friends_intro" readonly="true()" type="string" />
+            <bind calculate="position(../..)" nodeset="/nested-repeats/friends/friends_label/friend_count"
+                type="string" />
+            <bind nodeset="/nested-repeats/friends/friends_label/friend_name" type="string" />
+            <bind nodeset="/nested-repeats/friends/friends_label/pets_intro" readonly="true()" type="string" />
+            <bind calculate="position(../..)"
+                nodeset="/nested-repeats/friends/friends_label/pets/pets_label/pet_count" type="string" />
+            <bind nodeset="/nested-repeats/friends/friends_label/pets/pets_label/pet_name" type="string" />
+            <bind calculate="position(../..)" nodeset="/nested-repeats/enemies/enemies_label/enemy_count"
+                type="string" />
+            <bind nodeset="/nested-repeats/enemies/enemies_label/enemy_name" type="string" />
+            <bind calculate="concat('uuid:', uuid())" nodeset="/nested-repeats/meta/instanceID"
+                readonly="true()" type="string" />
+        </model>
+    </h:head>
+    <h:body>
+        <input ref="/nested-repeats/intro">
+            <label>This form demonstrates the use of nested groups in repeats to provide labels for those repeats. It's
+                also useful for testing nested repeats.
+            </label>
+        </input>
+        <input ref="/nested-repeats/friends_intro">
+            <label>You will now be asked questions about your friends. When you see a dialog, tap "Add" until you have
+                added all your friends.
+            </label>
+        </input>
+        <group ref="/nested-repeats/friends">
+            <label>Friends</label>
+            <repeat nodeset="/nested-repeats/friends">
+                <group ref="/nested-repeats/friends/friends_label">
+                    <label>
+                        <output value=" /nested-repeats/friends/friends_label/friend_name " />
+                    </label>
+                    <input ref="/nested-repeats/friends/friends_label/friend_name">
+                        <label>What is friend #<output
+                            value=" /nested-repeats/friends/friends_label/friend_count " />'s name?
+                        </label>
+                    </input>
+                    <input ref="/nested-repeats/friends/friends_label/pets_intro">
+                        <label>You will now be asked questions about<output
+                            value=" /nested-repeats/friends/friends_label/friend_name " />'s pets. When you see
+                            a dialog, tap &quot;Add&quot; until you have added all of<output
+                                value=" /nested-repeats/friends/friends_label/friend_name " />'s pets.
+                        </label>
+                    </input>
+                    <group ref="/nested-repeats/friends/friends_label/pets">
+                        <label>Pets</label>
+                        <repeat nodeset="/nested-repeats/friends/friends_label/pets">
+                            <group ref="/nested-repeats/friends/friends_label/pets/pets_label">
+                                <label>
+                                    <output
+                                        value=" /nested-repeats/friends/friends_label/pets/pets_label/pet_name " />
+                                </label>
+                                <input ref="/nested-repeats/friends/friends_label/pets/pets_label/pet_name">
+                                    <label>What is the name of<output
+                                        value=" /nested-repeats/friends/friends_label/friend_name " />'s pet #
+                                        <output
+                                            value=" /nested-repeats/friends/friends_label/pets/pets_label/pet_count " />
+                                        ?
+                                    </label>
+                                </input>
+                            </group>
+                        </repeat>
+                    </group>
+                </group>
+            </repeat>
+        </group>
+        <group ref="/nested-repeats/enemies">
+            <label>Enemies</label>
+            <repeat nodeset="/nested-repeats/enemies">
+                <group ref="/nested-repeats/enemies/enemies_label">
+                    <label>
+                        <output value=" /nested-repeats/enemies/enemies_label/enemy_name " />
+                    </label>
+                    <input ref="/nested-repeats/enemies/enemies_label/enemy_name">
+                        <label>What is enemy #<output
+                            value=" /nested-repeats/enemies/enemies_label/enemy_count " />'s name?
+                        </label>
+                    </input>
+                </group>
+            </repeat>
+        </group>
+    </h:body>
+</h:html>
