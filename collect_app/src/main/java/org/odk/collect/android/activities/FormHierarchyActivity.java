@@ -40,6 +40,7 @@ import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.exception.JavaRosaException;
 import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.logic.HierarchyElement;
+import org.odk.collect.android.utilities.DialogUtils;
 import org.odk.collect.android.utilities.FormEntryPromptUtils;
 import org.odk.collect.android.views.ODKView;
 
@@ -197,13 +198,15 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
     }
 
     private void updateOptionsMenu() {
-        // Menu will be updated automatically once it's been prepared.
+        // Not ready yet. Menu will be updated automatically once it's been prepared.
         if (optionsMenu == null) return;
 
         FormController formController = Collect.getInstance().getFormController();
-        int event = formController.getEvent();
         // TODO: Possible race condition
-        boolean isAtBeginning = event == FormEntryController.EVENT_BEGINNING_OF_FORM && !shouldShowRepeatGroupPicker();
+        boolean isAtBeginning = formController.isCurrentQuestionFirstInForm() && !shouldShowRepeatGroupPicker();
+
+        boolean isInRepeat = !isAtBeginning && screenIndex != null && formController.getEvent(screenIndex) == FormEntryController.EVENT_REPEAT;
+        optionsMenu.findItem(R.id.menu_delete_child).setVisible(isInRepeat).setEnabled(isInRepeat);
 
         boolean shouldShowPicker = shouldShowRepeatGroupPicker();
         optionsMenu.findItem(R.id.menu_add_child).setVisible(shouldShowPicker).setEnabled(shouldShowPicker);
@@ -215,13 +218,21 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_delete_child:
+                DialogUtils.createDeleteRepeatConfirmDialog(this, () -> {
+                    goUpLevel();
+                }, null);
+                return true;
+
             case R.id.menu_add_child:
                 FormIndex repeatPromptIndex = getRepeatPromptIndex(repeatGroupPickerIndex);
                 exitToIndex(repeatPromptIndex);
                 return true;
+
             case R.id.menu_go_up:
                 goUpLevel();
                 return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
