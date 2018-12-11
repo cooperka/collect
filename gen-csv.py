@@ -32,4 +32,4 @@ frame4 = frame4.assign(second = lambda x: x.name.str.split('').str[1] + x.name.s
 frame4 = frame4.assign(third = lambda x: x.name.str.split('').str[1] + x.name.str.split('').str[2] + x.name.str.split('').str[3])
 finalFrame = finalFrame.append(frame4, sort=False)
 
-finalFrame.to_csv('choices.csv', index=False)
+finalFrame.to_csv('choices-' + str(NUM_LETTERS) + '.csv', index=False)
