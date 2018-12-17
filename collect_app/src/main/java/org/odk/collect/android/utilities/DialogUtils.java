@@ -102,12 +102,16 @@ public final class DialogUtils {
                     formController.getTimerLogger().logTimerEvent(TimerLogger.EventTypes.DELETE_REPEAT, 0, null, false, true);
                     formController.deleteRepeat();
 
-                    if (onDeleted != null) onDeleted.run();
+                    if (onDeleted != null) {
+                        onDeleted.run();
+                    }
 
                     break;
 
                 case BUTTON_NEGATIVE: // no
-                    if (onCanceled != null) onCanceled.run();
+                    if (onCanceled != null) {
+                        onCanceled.run();
+                    }
 
                     break;
             }
@@ -151,16 +155,13 @@ public final class DialogUtils {
         AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
         alertDialog.setIcon(android.R.drawable.ic_dialog_info);
         alertDialog.setMessage(errorMsg);
-        DialogInterface.OnClickListener errorListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                switch (i) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        if (shouldExit) {
-                            activity.finish();
-                        }
-                        break;
-                }
+        DialogInterface.OnClickListener errorListener = (dialog, i) -> {
+            switch (i) {
+                case BUTTON_POSITIVE:
+                    if (shouldExit) {
+                        activity.finish();
+                    }
+                    break;
             }
         };
         alertDialog.setCancelable(false);
