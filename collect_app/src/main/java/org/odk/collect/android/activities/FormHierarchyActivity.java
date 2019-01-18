@@ -215,8 +215,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         }
 
         FormController formController = Collect.getInstance().getFormController();
-        FormIndex currIndex = formController.getFormIndex();
-        boolean isAtBeginning = currIndex.isBeginningOfFormIndex() && !shouldShowRepeatGroupPicker();
+        boolean isAtBeginning = screenIndex.isBeginningOfFormIndex() && !shouldShowRepeatGroupPicker();
         boolean shouldShowPicker = shouldShowRepeatGroupPicker();
         boolean isInRepeat = !isAtBeginning && formController.getEvent(screenIndex) == FormEntryController.EVENT_REPEAT;
 
@@ -226,7 +225,7 @@ public class FormHierarchyActivity extends CollectAbstractActivity {
         boolean shouldShowAdd = shouldShowPicker;
         showAddButton(shouldShowAdd);
 
-        boolean shouldShowGoUp = !isAtBeginning || shouldShowPicker;
+        boolean shouldShowGoUp = !isAtBeginning;
         showGoUpButton(shouldShowGoUp);
     }
 
