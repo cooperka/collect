@@ -14,8 +14,10 @@
 
 package org.odk.collect.android.logic;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import android.text.TextUtils;
 import com.google.android.gms.analytics.HitBuilders;
 
 import org.javarosa.core.model.CoreModelModule;
@@ -368,19 +370,24 @@ public class FormController {
             return false;
         }
 
-        GroupDef gd = (GroupDef) element; // exceptions?
-        return ODKView.FIELD_LIST.equalsIgnoreCase(gd.getAppearanceAttr());
+        return ODKView.FIELD_LIST.equalsIgnoreCase(element.getAppearanceAttr());
     }
 
     private boolean repeatIsFieldList(FormIndex index) {
-        // if this isn't a group, return right away
-        IFormElement element = formEntryController.getModel().getForm().getChild(index);
-        if (!(element instanceof GroupDef)) {
-            return false;
+        return groupIsFieldList(index);
+    }
+
+    /**
+     * Returns the `appearance` attribute of the current index, if any.
+     */
+    public String getAppearanceAttr(@NonNull FormIndex index) {
+        // FormDef can't have an appearance, it would throw an exception.
+        if (index.isBeginningOfFormIndex()) {
+            return null;
         }
 
-        GroupDef gd = (GroupDef) element; // exceptions?
-        return ODKView.FIELD_LIST.equalsIgnoreCase(gd.getAppearanceAttr());
+        IFormElement element = formEntryController.getModel().getForm().getChild(index);
+        return element.getAppearanceAttr();
     }
 
     /**
@@ -513,7 +520,7 @@ public class FormController {
      * If using a view like HierarchyView that doesn't support multi-question per screen, step over
      * the group represented by the FormIndex.
      */
-    private int stepOverGroup() {
+    public int stepOverGroup() {
         GroupDef gd =
                 (GroupDef) formEntryController.getModel().getForm()
                         .getChild(getFormIndex());
@@ -629,29 +636,57 @@ public class FormController {
     }
 
     /**
-     * Move the current form index to the index of the first enclosing repeat
+     * Move the current form index to the next event of the given type
+     * (or the end if none is found).
+     */
+    public int stepToNextEventType(int eventType) {
+        int event = getEvent();
+        do {
+            if (event == FormEntryController.EVENT_END_OF_FORM) {
+                break;
+            }
+            event = stepToNextEvent(FormController.STEP_OVER_GROUP);
+        } while (event != eventType);
+
+        return event;
+    }
+
+    /**
+     * Move the current form index to the index of the first displayable group
+     * (that is, a repeatable group or a visible group),
      * or to the start of the form.
      */
     public int stepToOuterScreenEvent() {
-        FormIndex index = stepIndexOut(getFormIndex());
-        int currentEvent = getEvent();
+        FormIndex index = getFormIndex();
 
-        // Step out of any group indexes that are present.
+        // Step out once to begin with if we're coming from a question.
+        if (getEvent() == FormEntryController.EVENT_QUESTION) {
+            index = stepIndexOut(index);
+        }
+
+        // Save where we started from.
+        FormIndex startIndex = index;
+
+        // Step out once more no matter what.
+        index = stepIndexOut(index);
+
+        // Step out of any group indexes that are present, unless they're visible.
         while (index != null
-                && getEvent(index) == FormEntryController.EVENT_GROUP) {
+                && getEvent(index) == FormEntryController.EVENT_GROUP
+                && !isDisplayableGroup(index)) {
             index = stepIndexOut(index);
         }
 
         if (index == null) {
             jumpToIndex(FormIndex.createBeginningOfFormIndex());
         } else {
-            if (currentEvent == FormEntryController.EVENT_REPEAT) {
-                // We were at a repeat, so stepping back brought us to then previous level
+            if (isDisplayableGroup(startIndex)) {
+                // We were at a displayable group, so stepping back brought us to the previous level
                 jumpToIndex(index);
             } else {
                 // We were at a question, so stepping back brought us to either:
-                // The beginning. or The start of a repeat. So we need to step
-                // out again to go passed the repeat.
+                // The beginning, or the start of a displayable group. So we need to step
+                // out again to go past the group.
                 index = stepIndexOut(index);
                 if (index == null) {
                     jumpToIndex(FormIndex.createBeginningOfFormIndex());
@@ -661,6 +696,23 @@ public class FormController {
             }
         }
         return getEvent();
+    }
+
+    /**
+     * Returns true if the index is either a repeatable group or a visible group.
+     */
+    public boolean isDisplayableGroup(FormIndex index) {
+        return getEvent(index) == FormEntryController.EVENT_REPEAT ||
+                (getEvent(index) == FormEntryController.EVENT_GROUP && isGroupLabeled(index));
+    }
+
+    /**
+     * Returns true if the group has a displayable label.
+     */
+    private boolean isGroupLabeled(FormIndex groupIndex) {
+        IFormElement group = formEntryController.getModel().getForm().getChild(groupIndex);
+        String label = group.getLabelInnerText();
+        return !TextUtils.isEmpty(label);
     }
 
     public static class FailedConstraint {

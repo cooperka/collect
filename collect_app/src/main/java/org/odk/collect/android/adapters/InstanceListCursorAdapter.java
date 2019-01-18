@@ -33,17 +33,27 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class ViewSentListAdapter extends SimpleCursorAdapter {
+public class InstanceListCursorAdapter extends SimpleCursorAdapter {
     private final Context context;
+    private final boolean shouldCheckDisabled;
 
-    public ViewSentListAdapter(Context context, int layout, Cursor c, String[] from, int[] to) {
+    public InstanceListCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, boolean shouldCheckDisabled) {
         super(context, layout, c, from, to);
         this.context = context;
+        this.shouldCheckDisabled = shouldCheckDisabled;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
+
+        ImageView imageView = view.findViewById(R.id.image);
+        setImageFromStatus(imageView);
+
+        // Some form lists never contain disabled items; if so, we're done.
+        if (!shouldCheckDisabled) {
+            return view;
+        }
 
         String formId = getCursor().getString(getCursor().getColumnIndex(InstanceProviderAPI.InstanceColumns.JR_FORM_ID));
         Cursor cursor = new FormsDao().getFormsCursorForFormId(formId);
@@ -63,15 +73,20 @@ public class ViewSentListAdapter extends SimpleCursorAdapter {
             }
         }
 
+        TextView titleText = view.findViewById(R.id.text1);
+        TextView subtitleText = view.findViewById(R.id.text2);
         TextView visibilityOffCause = view.findViewById(R.id.text4);
-        ImageView visibleOff = view.findViewById(R.id.visible_off);
         Long date = getCursor().getLong(getCursor().getColumnIndex(InstanceProviderAPI.InstanceColumns.DELETED_DATE));
 
-        visibleOff.setScaleX(0.9f);
-        visibleOff.setScaleY(0.9f);
         if (date != 0 || !formExists || isFormEncrypted) {
+            view.setEnabled(false);
             visibilityOffCause.setVisibility(View.VISIBLE);
-            visibleOff.setVisibility(View.VISIBLE);
+
+            // Material design "disabled" opacity is 38%.
+            titleText.setAlpha(0.38f);
+            subtitleText.setAlpha(0.38f);
+            visibilityOffCause.setAlpha(0.38f);
+            imageView.setAlpha(0.38f);
 
             if (date != 0) {
                 visibilityOffCause.setText(
@@ -83,9 +98,29 @@ public class ViewSentListAdapter extends SimpleCursorAdapter {
                 visibilityOffCause.setText(context.getString(R.string.encrypted_form));
             }
         } else {
+            view.setEnabled(true);
             visibilityOffCause.setVisibility(View.GONE);
-            visibleOff.setVisibility(View.GONE);
         }
+
         return view;
+    }
+
+    private void setImageFromStatus(ImageView imageView) {
+        String formStatus = getCursor().getString(getCursor().getColumnIndex(InstanceProviderAPI.InstanceColumns.STATUS));
+
+        switch (formStatus) {
+            case InstanceProviderAPI.STATUS_INCOMPLETE:
+                imageView.setImageResource(R.drawable.form_state_saved);
+                break;
+            case InstanceProviderAPI.STATUS_COMPLETE:
+                imageView.setImageResource(R.drawable.form_state_finalized);
+                break;
+            case InstanceProviderAPI.STATUS_SUBMITTED:
+                imageView.setImageResource(R.drawable.form_state_submitted);
+                break;
+            case InstanceProviderAPI.STATUS_SUBMISSION_FAILED:
+                imageView.setImageResource(R.drawable.form_state_failed);
+                break;
+        }
     }
 }

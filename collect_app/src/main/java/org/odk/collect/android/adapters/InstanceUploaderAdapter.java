@@ -3,14 +3,12 @@ package org.odk.collect.android.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.odk.collect.android.R;
@@ -22,7 +20,6 @@ import org.odk.collect.android.provider.InstanceProviderAPI;
 import org.odk.collect.android.tasks.sms.SmsService;
 import org.odk.collect.android.tasks.sms.contracts.SmsSubmissionManagerContract;
 import org.odk.collect.android.tasks.sms.models.SmsSubmission;
-import org.odk.collect.android.utilities.ThemeUtils;
 import org.odk.collect.android.views.ProgressBar;
 
 import javax.inject.Inject;
@@ -69,7 +66,7 @@ public class InstanceUploaderAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = LayoutInflater.from(context).inflate(R.layout.instance_upload_list_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.form_chooser_list_item_multiple_choice, parent, false);
         view.setTag(new ViewHolder(view));
         return view;
     }
@@ -78,9 +75,7 @@ public class InstanceUploaderAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        GradientDrawable shapeDrawable = (GradientDrawable) viewHolder.imageBackground.getBackground();
-        shapeDrawable.setColor(new ThemeUtils(context).getAccentColor());
-
+        viewHolder.progressBar.setVisibility(View.VISIBLE);
         viewHolder.progressBar.setProgressPercent(0, false);
 
         viewHolder.displayName.setText(cursor.getString(cursor.getColumnIndex(InstanceProviderAPI.InstanceColumns.DISPLAY_NAME)));
@@ -97,19 +92,16 @@ public class InstanceUploaderAdapter extends CursorAdapter {
         String status = cursor.getString(cursor.getColumnIndex(InstanceProviderAPI.InstanceColumns.STATUS));
 
         switch (status) {
-
             case STATUS_SUBMISSION_FAILED:
-
-                viewHolder.statusIcon.setImageResource(R.drawable.exclamation);
-
+                viewHolder.statusIcon.setImageResource(R.drawable.form_state_failed);
                 break;
 
             case STATUS_SUBMITTED:
-                viewHolder.statusIcon.setImageResource(R.drawable.check);
+                viewHolder.statusIcon.setImageResource(R.drawable.form_state_submitted);
                 break;
 
             default:
-                viewHolder.statusIcon.setImageResource(R.drawable.pencil);
+                viewHolder.statusIcon.setImageResource(R.drawable.form_state_finalized);
         }
 
         if (isSmsSubmission) {
@@ -160,21 +152,20 @@ public class InstanceUploaderAdapter extends CursorAdapter {
     }
 
     private void setSmsSubmissionStateIcons(int smsStatus, ViewHolder viewHolder) {
-
         switch (smsStatus) {
             case Activity.RESULT_OK:
-                viewHolder.statusIcon.setImageResource(R.drawable.check);
+                viewHolder.statusIcon.setImageResource(R.drawable.form_state_submitted);
                 break;
 
             case RESULT_QUEUED:
             case RESULT_OK_OTHERS_PENDING:
             case RESULT_SENDING:
             case RESULT_MESSAGE_READY:
-                viewHolder.statusIcon.setImageResource(R.drawable.message_text_outline);
+                viewHolder.statusIcon.setImageResource(R.drawable.form_state_sending);
                 break;
 
             default:
-                viewHolder.statusIcon.setImageResource(R.drawable.exclamation);
+                viewHolder.statusIcon.setImageResource(R.drawable.form_state_failed);
                 break;
         }
     }
@@ -187,17 +178,15 @@ public class InstanceUploaderAdapter extends CursorAdapter {
     }
 
     static class ViewHolder {
-        @BindView(R.id.image_background)
-        LinearLayout imageBackground;
-        @BindView(R.id.display_name)
+        @BindView(R.id.text1)
         TextView displayName;
-        @BindView(R.id.display_subtext)
+        @BindView(R.id.text2)
         TextView displaySubtext;
         @BindView(R.id.checkbox)
         CheckBox checkbox;
         @BindView(R.id.progress_bar)
         ProgressBar progressBar;
-        @BindView(R.id.status_icon)
+        @BindView(R.id.image)
         ImageView statusIcon;
         @BindView(R.id.close_box)
         ImageView closeButton;
